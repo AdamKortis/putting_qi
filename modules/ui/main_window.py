@@ -1,5 +1,8 @@
 import tkinter as tk
+from tkinter import messagebox
 from tkinter.ttk import Frame, Label, Entry, Button
+from datetime import datetime
+from modules.handlers.data_handlers import submit_data
 
 class MainWindow(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -28,7 +31,6 @@ class MainWindow(tk.Tk):
         self.date_frame = Frame(self)
         self.entry_date = tk.StringVar()
         
-
         # top label frame variables
         self.top_label_frames = []
         self.top_labels = ['Distance from Basket'
@@ -71,6 +73,7 @@ class MainWindow(tk.Tk):
 
         # aggregate total frames
         self.aggregate_total_frame = Frame(self)
+        self.aggregate_percent_frame = Frame(self)
         self.aggregate_total_variable = tk.IntVar(self.aggregate_total_frame, value=0)
         self.aggregate_percent_variable = tk.StringVar(self.aggregate_total_frame, value='0%')
 
@@ -150,13 +153,14 @@ class MainWindow(tk.Tk):
             self.col_total_variables.append(var_total)
             
     def create_aggregate_frames(self):
-        Label(self.aggregate_total_frame, textvariable=self.aggregate_total_variable).grid(row=0, column=0)
-        Label(self.aggregate_total_frame, textvariable=self.aggregate_percent_variable).grid(row=0, column=1)
-        self.aggregate_total_frame.grid(row=7, column=12, columnspan=2, rowspan=2)
+        Label(self.aggregate_total_frame, textvariable=self.aggregate_total_variable).pack()
+        Label(self.aggregate_percent_frame, textvariable=self.aggregate_percent_variable).pack()
+        self.aggregate_total_frame.grid(row=7, column=13)
+        self.aggregate_percent_frame.grid(row=7, column=14)
 
     def create_submit_frame(self):
-        Button(self.submit_frame, text='Submit Data').pack()
-        self.submit_frame.grid(row=9, column=0, columnspan=13)
+        Button(self.submit_frame, text='Submit Data', command=self.submit_data).pack()
+        self.submit_frame.grid(row=8, column=0, columnspan=13)
 
     def increase(self, row, column):
         self.putt_variables[row][column].set(self.putt_variables[row][column].get() + 1)
@@ -213,3 +217,37 @@ class MainWindow(tk.Tk):
     def update_aggregate_percent(self):
         percent = (self.col_total_variables[0].get() / self.aggregate_total_variable.get()) * 100
         self.aggregate_percent_variable.set(f'{round(percent, 2)}%')
+
+    def submit_data(self):
+        entry_date = self.check_date()
+        if entry_date == datetime(9999, 1, 1):
+            messagebox.showerror('Incorrect Date Format', 'Date should be of the following format: MM/DD/YYYY.')
+            return None
+        if self.aggregate_total_variable.get() == 0:
+            messagebox.showerror('No Data', 'You have not entered any data.')
+            return None
+        submit_data(self.putt_variables)
+        self.clear_fields()
+
+    def check_date(self):
+        try:
+            putt_date = datetime.strptime(self.entry_date.get(), '%m/%d/%Y')
+        except TypeError:
+            putt_date = datetime.strptime('01/01/9999', '%m/%d/%Y')
+        except ValueError:
+            putt_date = datetime.strptime('01/01/9999', '%m/%d/%Y')
+        return putt_date
+    
+    def clear_fields(self):
+        self.entry_date.set('')
+        for x in self.putt_variables:
+            for y in x:
+                y.set(0)
+        for x in self.row_total_variables:
+            x.set(0)
+        for x in self.row_percent_variables:
+            x.set('0%')
+        for x in self.col_total_variables:
+            x.set(0)
+        self.aggregate_total_variable.set(0)
+        self.aggregate_percent_variable.set('0%')
