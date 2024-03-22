@@ -53,8 +53,7 @@ class MainWindow(tk.Tk):
                                 , '6 Meters'
                                 , '8 Meters'
                                 , '10 Meters'
-                                , 'Total'
-                                , 'Percent Made']
+                                , 'Total']
         
         # putt frames
         self.putt_frames = []
@@ -68,14 +67,12 @@ class MainWindow(tk.Tk):
         
         # column total/percent frames
         self.col_total_frames = []
-        self.col_percent_frames = []
         self.col_total_variables = []
-        self.col_percent_variables = []
 
         # aggregate total frames
         self.aggregate_total_frame = Frame(self)
         self.aggregate_total_variable = tk.IntVar(self.aggregate_total_frame, value=0)
-        self.aggregate_total_percent = tk.StringVar(self.aggregate_total_frame, value='0%')
+        self.aggregate_percent_variable = tk.StringVar(self.aggregate_total_frame, value='0%')
 
         # create submit frame
         self.submit_frame = Frame(self)
@@ -134,7 +131,7 @@ class MainWindow(tk.Tk):
             percent_frame = Frame(self)
             var_total = tk.IntVar(total_frame, value=0)
             var_percent = tk.StringVar(percent_frame, value='0%')
-            Label(total_frame, textvariable=var_total).pack()     
+            Label(total_frame, text=var_total.get(), textvariable=var_total).pack()     
             Label(percent_frame, textvariable=var_percent).pack()
             total_frame.grid(row=x+2, column=13)  
             percent_frame.grid(row=x+2, column=14)
@@ -146,27 +143,28 @@ class MainWindow(tk.Tk):
     def create_col_total_frames(self):
         for y in range(11):
             total_frame = Frame(self)
-            percent_frame = Frame(self)
             var_total = tk.IntVar(total_frame, value=0)
-            var_percent = tk.IntVar(percent_frame, value='0%')
-            Label(total_frame, textvariable=var_total).pack()
-            Label(percent_frame, textvariable=var_percent).pack()
+            Label(total_frame, text=var_total.get(), textvariable=var_total).pack()
             total_frame.grid(row=7, column=y+1)
-            percent_frame.grid(row=8, column=y+1)
             self.col_total_frames.append(total_frame)
-            self.col_percent_frames.append(percent_frame)
+            self.col_total_variables.append(var_total)
             
     def create_aggregate_frames(self):
         Label(self.aggregate_total_frame, textvariable=self.aggregate_total_variable).grid(row=0, column=0)
-        Label(self.aggregate_total_frame, textvariable=self.aggregate_total_percent).grid(row=0, column=1)
+        Label(self.aggregate_total_frame, textvariable=self.aggregate_percent_variable).grid(row=0, column=1)
         self.aggregate_total_frame.grid(row=7, column=12, columnspan=2, rowspan=2)
 
     def create_submit_frame(self):
         Button(self.submit_frame, text='Submit Data').pack()
-        self.submit_frame.grid(row=9, column=0, columnspan=14)
+        self.submit_frame.grid(row=9, column=0, columnspan=13)
 
     def increase(self, row, column):
         self.putt_variables[row][column].set(self.putt_variables[row][column].get() + 1)
+        self.increase_row_total(row)
+        self.increase_col_total(column)
+        self.increase_aggregate_total()
+        self.update_row_percent(row)
+        self.update_aggregate_percent()
         self.update()
 
     def decrease(self, row, column):
@@ -174,4 +172,44 @@ class MainWindow(tk.Tk):
             self.putt_variables[row][column].set(0)
         else:
             self.putt_variables[row][column].set(self.putt_variables[row][column].get() - 1)
+            self.decrease_row_total(row)
+            self.decrease_col_total(column)
+            self.decrease_aggregate_total()
+            self.update_row_percent(row)
+            self.update_aggregate_percent()
         self.update()
+
+    def increase_row_total(self, row):
+        self.row_total_variables[row].set(self.row_total_variables[row].get() + 1)
+
+    def decrease_row_total(self, row):
+        if self.row_total_variables[row].get() <= 0:
+            self.row_total_variables[row].set(0)
+        else:
+            self.row_total_variables[row].set(self.row_total_variables[row].get() - 1)
+
+    def increase_col_total(self, col):
+        self.col_total_variables[col].set(self.col_total_variables[col].get() + 1)
+
+    def decrease_col_total(self, col):
+        if self.col_total_variables[col].get() <= 0:
+            self.col_total_variables[col].set(0)
+        else:
+            self.col_total_variables[col].set(self.col_total_variables[col].get() - 1)
+
+    def increase_aggregate_total(self):
+        self.aggregate_total_variable.set(self.aggregate_total_variable.get() + 1)
+
+    def decrease_aggregate_total(self):
+        if self.aggregate_total_variable.get() <= 0:
+            self.aggregate_total_variable.set(0)
+        else:
+            self.aggregate_total_variable.set(self.aggregate_total_variable.get() - 1)
+
+    def update_row_percent(self, row):
+        percent = (self.putt_variables[row][0].get() / self.row_total_variables[row].get()) * 100
+        self.row_percent_variables[row].set(f'{round(percent, 2)}%')
+
+    def update_aggregate_percent(self):
+        percent = (self.col_total_variables[0].get() / self.aggregate_total_variable.get()) * 100
+        self.aggregate_percent_variable.set(f'{round(percent, 2)}%')
