@@ -29,15 +29,15 @@ class ParetoChart():
 
     def create_failures(self):
         total_failures = {x: int(self.df[x].sum()) for x in self.failures}
-        total_failures.sort(reverse=True)
+        total_failures = {key: value for key, value in sorted(total_failures.items(), key=lambda item: item[1], reverse=True)}
         self.total_failures = total_failures
 
     def create_total_misses(self):
-        for x in self.total_failures:
-            self.total_misses += x
+        for key, value in self.total_failures.items():
+            self.total_misses += value
 
     def create_cumulative_percent(self):
-        self.percent_failures = [(x / self.total_misses) * 100 for x in self.total_failures]
+        self.percent_failures = [(x / self.total_misses) * 100 for x in self.total_failures.values()]
         for x, i in enumerate(self.percent_failures):
             if x == 0:
                 self.cumulative_percent.append(i)
@@ -50,7 +50,7 @@ class ParetoChart():
         plt.bar(plot_points, self.percent_failures)
         plt.plot(plot_points, self.cumulative_percent, color='red', marker='o')
         for x in plot_points:
-            plt.annotate(str(round(self.percent_failures[x], 1)), (x, self.percent_failures[x]))
-            plt.annotate(str(round(self.cumulative_percent[x], 1)), (x, self.cumulative_percent[x]))
-        plt.xticks(plot_points, labels=self.failures)
+            plt.annotate(str(list(self.total_failures.values())[x]), (x-.1, self.percent_failures[x]-5))
+            plt.annotate(str(round(self.cumulative_percent[x], 1)), (x-.5, self.cumulative_percent[x]))
+        plt.xticks(plot_points, labels=list(self.total_failures.keys()))
         return fig

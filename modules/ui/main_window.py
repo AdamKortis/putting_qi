@@ -10,6 +10,8 @@ class MainWindow(tk.Tk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.protocol('WM_DELETE_WINDOW', self.__close)
+
         x = int(self.winfo_screenwidth() / 2 - 640)
         y = int(self.winfo_screenheight() / 2 - 360)
 
@@ -78,6 +80,10 @@ class MainWindow(tk.Tk):
         self.submit_frame = Frame(self.input_tab)
         
         self.execute()
+
+    def __close(self):
+        self.quit()
+        self.destroy()
 
     def execute(self):
         self.create_date_label()
@@ -236,6 +242,8 @@ class MainWindow(tk.Tk):
             return None
         submit_data(entry_date, self.putt_variables)
         self.clear_fields()
+        self.redraw_pareto()
+        self.redraw_control()
 
     def check_date(self):
         try:
@@ -266,8 +274,24 @@ class MainWindow(tk.Tk):
             Label(self.control_tab, text='No data to display.').pack()
         else:
             self.create_pareto_chart()
+            self.create_control_chart()
 
     def create_pareto_chart(self):
         figure = create_pareto_chart()
         canvas = FigureCanvasTkAgg(figure, self.pareto_tab)
         canvas.get_tk_widget().pack()
+
+    def redraw_pareto(self):
+        for widget in self.pareto_tab.winfo_children():
+            widget.destroy()
+        self.create_pareto_chart()
+
+    def create_control_chart(self):
+        figure = create_control_chart()
+        canvas = FigureCanvasTkAgg(figure, self.control_tab)
+        canvas.get_tk_widget().pack()
+
+    def redraw_control(self):
+        for widget in self.control_tab.winfo_children():
+            widget.destroy()
+        self.create_control_chart()

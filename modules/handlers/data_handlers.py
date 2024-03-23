@@ -2,6 +2,7 @@ from os.path import isfile
 from os import getcwd
 import pandas as pd
 from modules.data.pareto_chart import ParetoChart
+from modules.data.control_chart import ControlChart
 from datetime import datetime
 
 DATA_FILE = f'{getcwd()}/files/csv/putt_data.csv'
@@ -42,3 +43,8 @@ def create_pareto_chart():
     df = load_file()
     pareto_chart = ParetoChart(df)
     return pareto_chart.create_pareto_chart()
+
+def create_control_chart():
+    df = load_file()
+    control_chart = ControlChart(df)
+    return control_chart.create_control_chart()
