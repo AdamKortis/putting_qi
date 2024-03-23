@@ -8,7 +8,7 @@ def submit_data(putt_data: list):
     if file_check():
         df = pd.read_csv(DATA_FILE, header=0, sep='|')
     else:
-        header='d|m|hi|hir|r|lor|lo|lol|l|hil|co|ff\n'
+        header='Distance|Made|High|High-Right|Right|Low-Right|Low|Low-Left|Left|High-Left|Chain Out|Foot Fault\n'
         f = open(DATA_FILE, 'w')
         f.write(header)
         f.close()
@@ -32,3 +32,6 @@ def submit_data(putt_data: list):
 
 def file_check():
     return isfile(DATA_FILE)
+
+def load_file():
+    return pd.read_csv(DATA_FILE, header=0, sep='|')

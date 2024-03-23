@@ -2,7 +2,9 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter.ttk import Frame, Label, Entry, Button, Notebook
 from datetime import datetime
-from modules.handlers.data_handlers import submit_data
+from modules.handlers.data_handlers import *
+import pandas as pd
+from modules.data.pareto_chart import ParetoChart
 
 class MainWindow(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -86,6 +88,7 @@ class MainWindow(tk.Tk):
         self.create_col_total_frames()
         self.create_aggregate_frames()
         self.create_submit_frame()
+        self.check_for_data()
         self.add_tabs()        
 
     def add_tabs(self):
@@ -256,3 +259,10 @@ class MainWindow(tk.Tk):
             x.set(0)
         self.aggregate_total_variable.set(0)
         self.aggregate_percent_variable.set('0%')
+
+    def check_for_data(self):
+        if not file_check():
+            Label(self.pareto_tab, text='No data to display.').pack()
+            Label(self.control_tab, text='No data to display.').pack()
+        else:
+            create_pareto_chart()
