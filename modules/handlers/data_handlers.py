@@ -1,14 +1,16 @@
 from os.path import isfile
 from os import getcwd
 import pandas as pd
+from modules.data.pareto_chart import ParetoChart
+from datetime import datetime
 
 DATA_FILE = f'{getcwd()}/files/csv/putt_data.csv'
 
-def submit_data(putt_data: list):
+def submit_data(date: datetime, putt_data: list):
     if file_check():
         df = pd.read_csv(DATA_FILE, header=0, sep='|')
     else:
-        header='Distance|Made|High|High-Right|Right|Low-Right|Low|Low-Left|Left|High-Left|Chain Out|Foot Fault\n'
+        header='Date|Distance|Made|High|High-Right|Right|Low-Right|Low|Low-Left|Left|High-Left|Chain Out|Foot Fault\n'
         f = open(DATA_FILE, 'w')
         f.write(header)
         f.close()
@@ -26,7 +28,7 @@ def submit_data(putt_data: list):
             distance = 10
         else:
             distance = 0
-        putt_data = [distance, ] + [x.get() for x in row_data]
+        putt_data = [date, distance] + [x.get() for x in row_data]
         df.loc[len(df)] = putt_data
     df.to_csv(DATA_FILE, header=True, index=False, sep='|')
 
@@ -35,3 +37,8 @@ def file_check():
 
 def load_file():
     return pd.read_csv(DATA_FILE, header=0, sep='|')
+
+def create_pareto_chart():
+    df = load_file()
+    pareto_chart = ParetoChart(df)
+    return pareto_chart.create_pareto_chart()

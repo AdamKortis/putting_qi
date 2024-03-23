@@ -4,7 +4,7 @@ from tkinter.ttk import Frame, Label, Entry, Button, Notebook
 from datetime import datetime
 from modules.handlers.data_handlers import *
 import pandas as pd
-from modules.data.pareto_chart import ParetoChart
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class MainWindow(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -234,7 +234,7 @@ class MainWindow(tk.Tk):
         if self.aggregate_total_variable.get() == 0:
             messagebox.showerror('No Data', 'You have not entered any data.')
             return None
-        submit_data(self.putt_variables)
+        submit_data(entry_date, self.putt_variables)
         self.clear_fields()
 
     def check_date(self):
@@ -265,4 +265,9 @@ class MainWindow(tk.Tk):
             Label(self.pareto_tab, text='No data to display.').pack()
             Label(self.control_tab, text='No data to display.').pack()
         else:
-            create_pareto_chart()
+            self.create_pareto_chart()
+
+    def create_pareto_chart(self):
+        figure = create_pareto_chart()
+        canvas = FigureCanvasTkAgg(figure, self.pareto_tab)
+        canvas.get_tk_widget().pack()
