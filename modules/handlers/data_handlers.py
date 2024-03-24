@@ -41,7 +41,7 @@ def load_file():
 
 def create_pareto_chart(distance: str):
     df = load_file()
-    if distance is not None:
+    if distance is not None and distance != 'all':
         pareto_chart = ParetoChart(df, distance)
     else:
         pareto_chart = ParetoChart(df)
@@ -49,7 +49,7 @@ def create_pareto_chart(distance: str):
 
 def create_control_chart(distance: str):
     df = load_file()
-    if distance is not None:
+    if distance is not None and distance != 'all':
         control_chart = ControlChart(df, distance)
     else:
         control_chart = ControlChart(df)

@@ -5,6 +5,7 @@ from datetime import datetime
 from modules.handlers.data_handlers import *
 import pandas as pd
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.pyplot import close as plot_close
 
 class MainWindow(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -301,6 +302,7 @@ class MainWindow(tk.Tk):
     def redraw_pareto(self, distance: str = None):
         for widget in self.pareto_tab.winfo_children():
             widget.destroy()
+        plot_close('all')
         self.create_pareto_chart(distance)
 
     def create_control_chart(self, distance: str = None):
@@ -311,11 +313,12 @@ class MainWindow(tk.Tk):
     def redraw_control(self, distance: str = None):
         for widget in self.control_tab.winfo_children():
             widget.destroy()
+        plot_close('all')
         self.create_control_chart(distance)
 
     def subset_distance(self):
         top = Toplevel(self)
-        distance_select = Combobox(top, values=['2', '4', '6', '8', '10'], textvariable=self.distance).pack()
+        distance_select = Combobox(top, values=['all','2', '4', '6', '8', '10'], textvariable=self.distance).pack()
         Button(top, text='Submit', command=lambda: self.redraw_charts(top, self.distance.get())).pack()
 
     def redraw_charts(self, top: Toplevel, distance: str):

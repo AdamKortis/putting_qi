@@ -7,8 +7,8 @@ class ControlChart():
     def __init__(self, df: pd.DataFrame, distance: str = None):
         self.df = df if distance is None else df.loc[df['Distance'] == int(distance)]
 
-        self.run = True if len(self.df) >= 8 else False
-        self.control = True if len(self.df) >= 20 else False
+        self.run = True if len(list(self.df['Date'].drop_duplicates().values)) >= 8 else False
+        self.control = True if len(list(self.df['Date'].drop_duplicates().values)) >= 20 else False
 
         self.x_values = []
         self.y_values = []
