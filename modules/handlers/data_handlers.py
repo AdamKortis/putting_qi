@@ -39,12 +39,18 @@ def file_check():
 def load_file():
     return pd.read_csv(DATA_FILE, header=0, sep='|')
 
-def create_pareto_chart():
+def create_pareto_chart(distance: str):
     df = load_file()
-    pareto_chart = ParetoChart(df)
+    if distance is not None:
+        pareto_chart = ParetoChart(df, distance)
+    else:
+        pareto_chart = ParetoChart(df)
     return pareto_chart.create_pareto_chart()
 
-def create_control_chart():
+def create_control_chart(distance: str):
     df = load_file()
-    control_chart = ControlChart(df)
+    if distance is not None:
+        control_chart = ControlChart(df, distance)
+    else:
+        control_chart = ControlChart(df)
     return control_chart.create_control_chart()

@@ -1,17 +1,19 @@
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
+from datetime import datetime
 
 class ControlChart():
-    def __init__(self, df: pd.DataFrame):
-        self.df = df
+    def __init__(self, df: pd.DataFrame, distance: str = None):
+        self.df = df if distance is None else df.loc[df['Distance'] == int(distance)]
 
-        self.run = True if len(self.df) >= 12 else False
+        self.run = True if len(self.df) >= 8 else False
         self.control = True if len(self.df) >= 20 else False
 
         self.x_values = []
         self.y_values = []
         self.x_points = []
+        self.median = []
         self.centerline = []
         self.ucl = []
         self.lcl = []
@@ -24,13 +26,16 @@ class ControlChart():
         self.create_data_points()
         self.create_x_y_values()
         self.create_x_points()
-        self.create_centerline()
-        self.create_upper_control_limit()
-        self.create_lower_control_limit()
-        self.flag_above_centerline()
-        self.flag_below_centerline()
-        self.flag_shift_up()
-        self.flag_shift_down()
+        if self.run:
+            self.create_median_centerline()
+        if self.control:
+            self.create_centerline()
+            self.create_upper_control_limit()
+            self.create_lower_control_limit()
+            self.flag_above_centerline()
+            self.flag_below_centerline()
+            self.flag_shift_up()
+            self.flag_shift_down()
 
     def create_data_points(self):
         self.df['Total Putts'] = self.df[['Made'
@@ -47,14 +52,21 @@ class ControlChart():
         self.df['Date'] = pd.to_datetime(self.df['Date'])
         self.df = self.df.groupby('Date')[['Made', 'Total Putts']].sum()
         self.df.reset_index(inplace=True)
-        self.df['data_point'] = (self.df['Made'] / self.df['Total Putts']) * 100
+        try:
+            self.df['data_point'] = (self.df['Made'] / self.df['Total Putts']) * 100
+        except ZeroDivisionError:
+            self.df['data_point'] = 0
 
     def create_x_y_values(self):
-        self.x_values = list(self.df['Date'].values)
+        self.x_values = [pd.to_datetime(x).strftime('%m/%d/%y') for x in self.df['Date'].values]
         self.y_values = list(self.df['data_point'].values)
     
     def create_x_points(self):
         self.x_points = [x for x in range(len(self.x_values))]
+
+    def create_median_centerline(self):
+        self.df['median'] = self.df['data_point'].median()
+        self.median = list(self.df['median'].values)
 
     def create_centerline(self):
         temp_df = self.df.head(20).copy()
@@ -126,6 +138,7 @@ class ControlChart():
                 plt.scatter(x, y, color='blue', marker='o')
         elif self.run and not self.control:
             plt.plot(self.x_points, self.y_values, color='blue', marker='o')
+            plt.plot(self.x_points, self.median, color='red')
         elif self.run and self.control:
             plt.plot(self.x_points, self.y_values, color='blue')
             plt.plot(self.x_points, self.centerline, color='red')

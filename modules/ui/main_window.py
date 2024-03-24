@@ -1,6 +1,6 @@
 import tkinter as tk
-from tkinter import messagebox
-from tkinter.ttk import Frame, Label, Entry, Button, Notebook
+from tkinter import messagebox, Menu, Toplevel
+from tkinter.ttk import Frame, Label, Entry, Button, Notebook, Combobox
 from datetime import datetime
 from modules.handlers.data_handlers import *
 import pandas as pd
@@ -78,7 +78,10 @@ class MainWindow(tk.Tk):
 
         # create submit frame
         self.submit_frame = Frame(self.input_tab)
-        
+
+        # distance select
+        self.distance = tk.StringVar()
+
         self.execute()
 
     def __close(self):
@@ -86,6 +89,7 @@ class MainWindow(tk.Tk):
         self.destroy()
 
     def execute(self):
+        self.create_menus()
         self.create_date_label()
         self.create_top_labels()
         self.create_distance_labels()   
@@ -105,6 +109,13 @@ class MainWindow(tk.Tk):
         self.main_tabs.add(self.pareto_tab, text='Pareto Chart')
         self.main_tabs.add(self.control_tab, text='Control Chart')
         self.main_tabs.pack()
+
+    def create_menus(self):
+        menu = Menu(self)
+        chart_menu = Menu(menu, tearoff=0)
+        chart_menu.add_command(label='Subset on Distance', command=self.subset_distance)
+        menu.add_cascade(label='Charts', menu=chart_menu)
+        self.config(menu=menu)
 
     def create_date_label(self):
         Label(self.date_frame, text='Date:').pack()
@@ -276,22 +287,32 @@ class MainWindow(tk.Tk):
             self.create_pareto_chart()
             self.create_control_chart()
 
-    def create_pareto_chart(self):
-        figure = create_pareto_chart()
+    def create_pareto_chart(self, distance: str = None):
+        figure = create_pareto_chart(distance)
         canvas = FigureCanvasTkAgg(figure, self.pareto_tab)
         canvas.get_tk_widget().pack()
 
-    def redraw_pareto(self):
+    def redraw_pareto(self, distance: str = None):
         for widget in self.pareto_tab.winfo_children():
             widget.destroy()
-        self.create_pareto_chart()
+        self.create_pareto_chart(distance)
 
-    def create_control_chart(self):
-        figure = create_control_chart()
+    def create_control_chart(self, distance: str = None):
+        figure = create_control_chart(distance)
         canvas = FigureCanvasTkAgg(figure, self.control_tab)
         canvas.get_tk_widget().pack()
 
-    def redraw_control(self):
+    def redraw_control(self, distance: str = None):
         for widget in self.control_tab.winfo_children():
             widget.destroy()
-        self.create_control_chart()
+        self.create_control_chart(distance)
+
+    def subset_distance(self):
+        top = Toplevel(self)
+        distance_select = Combobox(top, values=['2', '4', '6', '8', '10'], textvariable=self.distance).pack()
+        Button(top, text='Submit', command=lambda: self.redraw_charts(top, self.distance.get())).pack()
+
+    def redraw_charts(self, top: Toplevel, distance: str):
+        top.destroy()
+        self.redraw_pareto(distance)
+        self.redraw_control(distance)

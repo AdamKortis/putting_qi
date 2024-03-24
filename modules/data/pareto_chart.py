@@ -2,8 +2,8 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 class ParetoChart():
-    def __init__(self, df: pd.DataFrame):
-        self.df = df
+    def __init__(self, df: pd.DataFrame, distance: int = None):
+        self.df = df if distance is None else df.loc[df['Distance'] == int(distance)]
 
         self.failures = ['High'
                          , 'High-Right'
@@ -37,7 +37,10 @@ class ParetoChart():
             self.total_misses += value
 
     def create_cumulative_percent(self):
-        self.percent_failures = [(x / self.total_misses) * 100 for x in self.total_failures.values()]
+        try:
+            self.percent_failures = [(x / self.total_misses) * 100 for x in self.total_failures.values()]
+        except ZeroDivisionError:
+            self.percent_failures = [0 for x in self.failures]
         for x, i in enumerate(self.percent_failures):
             if x == 0:
                 self.cumulative_percent.append(i)
