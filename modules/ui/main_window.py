@@ -201,11 +201,11 @@ class MainWindow(tk.Tk):
             self.putt_variables[row][column].set(0)
         else:
             self.putt_variables[row][column].set(self.putt_variables[row][column].get() - 1)
-            self.decrease_row_total(row)
-            self.decrease_col_total(column)
-            self.decrease_aggregate_total()
-            self.update_row_percent(row)
-            self.update_aggregate_percent()
+        self.decrease_row_total(row)
+        self.decrease_col_total(column)
+        self.decrease_aggregate_total()
+        self.update_row_percent(row)
+        self.update_aggregate_percent()
         self.update()
 
     def increase_row_total(self, row):
@@ -236,11 +236,17 @@ class MainWindow(tk.Tk):
             self.aggregate_total_variable.set(self.aggregate_total_variable.get() - 1)
 
     def update_row_percent(self, row):
-        percent = (self.putt_variables[row][0].get() / self.row_total_variables[row].get()) * 100
+        try:
+            percent = (self.putt_variables[row][0].get() / self.row_total_variables[row].get()) * 100
+        except ZeroDivisionError:
+            percent = 0
         self.row_percent_variables[row].set(f'{round(percent, 2)}%')
 
     def update_aggregate_percent(self):
-        percent = (self.col_total_variables[0].get() / self.aggregate_total_variable.get()) * 100
+        try:
+            percent = (self.col_total_variables[0].get() / self.aggregate_total_variable.get()) * 100
+        except ZeroDivisionError:
+            percent = 0
         self.aggregate_percent_variable.set(f'{round(percent, 2)}%')
 
     def submit_data(self):
