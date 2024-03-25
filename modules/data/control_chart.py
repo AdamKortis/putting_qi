@@ -139,6 +139,7 @@ class ControlChart():
         elif self.run and not self.control:
             plt.plot(self.x_points, self.y_values, color='blue', marker='o')
             plt.plot(self.x_points, self.median, color='red')
+            plt.annotate(str(round(self.median[0], 2))+'%', (self.x_points[0], self.median[0]))
         elif self.run and self.control:
             plt.plot(self.x_points, self.y_values, color='blue')
             plt.plot(self.x_points, self.centerline, color='red')
@@ -146,6 +147,7 @@ class ControlChart():
             plt.plot(self.x_points, self.lcl, color='gray', style='dashed')
             for x, y, c, m in zip(self.x_points, self.y_values, self.colors, self.markers):
                 plt.scatter(x, y, color=c, marker=m)
+            plt.annotate(str(round(self.centerline[0], 2))+'%', (self.x_points[0], self.centerline[0]))
         plt.xticks(self.x_points, labels=self.x_values)
         return fig
         
