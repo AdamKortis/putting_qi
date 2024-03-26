@@ -132,7 +132,7 @@ class ControlChart():
                 self.markers.append('o')
 
     def create_control_chart(self):
-        fig = plt.figure(figsize=(10,5))
+        fig = plt.figure(figsize=(10,6))
         if not self.run and not self.control:
             for x, y in zip(self.x_points, self.y_values):
                 plt.scatter(x, y, color='blue', marker='o')
@@ -148,7 +148,7 @@ class ControlChart():
             for x, y, c, m in zip(self.x_points, self.y_values, self.colors, self.markers):
                 plt.scatter(x, y, color=c, marker=m)
             plt.annotate(str(round(self.centerline[0], 2))+'%', (self.x_points[0], self.centerline[0]))
-        plt.xticks(self.x_points, labels=self.x_values)
+        plt.xticks(self.x_points, labels=self.x_values, rotation=90, fontsize=8)
         return fig
         
 
