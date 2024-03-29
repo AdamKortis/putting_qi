@@ -36,6 +36,7 @@ class ControlChart():
             self.flag_below_centerline()
             self.flag_shift_up()
             self.flag_shift_down()
+            self.create_marker_formats()
 
     def create_data_points(self):
         self.df['Total Putts'] = self.df[['Made'
@@ -75,11 +76,14 @@ class ControlChart():
 
     def create_upper_control_limit(self):
         self.df['ucl'] = self.df['centerline'] + (3 * np.sqrt((self.df['centerline'] * (100 - self.df['centerline']))/20))
+        self.df.loc[self.df['ucl'] > 100, 'ucl'] = 100
         self.ucl = list(self.df['ucl'].values)
 
     def create_lower_control_limit(self):
         self.df['lcl'] = self.df['centerline'] - (3 * np.sqrt((self.df['centerline'] * (100 - self.df['centerline']))/20))
-        self.df['lcl'] = list(self.df['lcl'].values)
+        self.df.loc[self.df['lcl'] < 0, 'lcl'] = 0
+        self.lcl = list(self.df['lcl'].values)
+
 
     def flag_above_centerline(self):
         self.df['above_centerline'] = 0
@@ -143,8 +147,8 @@ class ControlChart():
         elif self.run and self.control:
             plt.plot(self.x_points, self.y_values, color='blue')
             plt.plot(self.x_points, self.centerline, color='red')
-            plt.plot(self.x_points, self.ucl, color='gray', style='dashed')
-            plt.plot(self.x_points, self.lcl, color='gray', style='dashed')
+            plt.plot(self.x_points, self.ucl, color='gray', linestyle='dashed')
+            plt.plot(self.x_points, self.lcl, color='gray', linestyle='dashed')
             for x, y, c, m in zip(self.x_points, self.y_values, self.colors, self.markers):
                 plt.scatter(x, y, color=c, marker=m)
             plt.annotate(str(round(self.centerline[0], 2))+'%', (self.x_points[0], self.centerline[0]))
