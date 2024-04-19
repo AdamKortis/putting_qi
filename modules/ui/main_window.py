@@ -202,9 +202,9 @@ class MainWindow(tk.Tk):
             self.putt_variables[row][column].set(0)
         else:
             self.putt_variables[row][column].set(self.putt_variables[row][column].get() - 1)
-        self.decrease_row_total(row)
-        self.decrease_col_total(column)
-        self.decrease_aggregate_total()
+            self.decrease_row_total(row)
+            self.decrease_col_total(column)
+            self.decrease_aggregate_total()
         self.update_row_percent(row)
         self.update_aggregate_percent()
         self.update()
