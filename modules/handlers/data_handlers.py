@@ -39,20 +39,26 @@ def file_check():
 def load_file():
     return pd.read_csv(DATA_FILE, header=0, sep='|')
 
-def create_pareto_chart(distance: str):
+def create_pareto_chart(distance: str, start_date: str, stop_date: str):
     df = load_file()
     df.sort_values(by='Date', inplace=True)
     if distance is not None and distance != 'all':
-        pareto_chart = ParetoChart(df, distance)
+        pareto_chart = ParetoChart(df, distance, start_date, stop_date)
     else:
-        pareto_chart = ParetoChart(df)
+        pareto_chart = ParetoChart(df, start_date=start_date, stop_date=stop_date)
     return pareto_chart.create_pareto_chart()
 
-def create_control_chart(distance: str):
+def create_control_chart(distance: str, start_date: str, stop_date: str):
     df = load_file()
     df.sort_values(by='Date', inplace=True)
     if distance is not None and distance != 'all':
-        control_chart = ControlChart(df, distance)
+        control_chart = ControlChart(df, distance, start_date, stop_date)
     else:
-        control_chart = ControlChart(df)
+        control_chart = ControlChart(df, start_date=start_date, stop_date=stop_date)
     return control_chart.create_control_chart()
+
+def get_dates() -> list:
+    df = load_file()
+    df.sort_values(by='Date', inplace=True)
+    date_list = list(df['Date'].drop_duplicates().values)
+    return [x[:10] for x in date_list]

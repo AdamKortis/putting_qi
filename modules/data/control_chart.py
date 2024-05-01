@@ -4,11 +4,16 @@ from matplotlib import pyplot as plt
 from datetime import datetime
 
 class ControlChart():
-    def __init__(self, df: pd.DataFrame, distance: str = None):
-        self.df = df if distance is None else df.loc[df['Distance'] == int(distance)]
+    def __init__(self, df: pd.DataFrame, distance: str = None, start_date: str = None, stop_date: str = None):
+        self.df = df 
+        self.distance = distance
+        self.start_date = start_date
+        self.stop_date = stop_date
 
         self.run = True if len(list(self.df['Date'].drop_duplicates().values)) >= 8 else False
         self.control = True if len(list(self.df['Date'].drop_duplicates().values)) >= 20 else False
+
+        self.chart_range = [None, None]
 
         self.x_values = []
         self.y_values = []
@@ -23,6 +28,8 @@ class ControlChart():
         self.execute()
 
     def execute(self):
+        if self.distance is not None and self.distance != '':
+            self.df = self.df.loc[self.df['Distance'] == int(self.distance)]
         self.create_data_points()
         self.create_x_y_values()
         self.create_x_points()
@@ -37,6 +44,28 @@ class ControlChart():
             self.flag_shift_up()
             self.flag_shift_down()
             self.create_marker_formats()
+        date_list = list(self.df['Date'].drop_duplicates().values)
+        date_list = [str(x)[:10] for x in date_list]
+        if self.start_date is not None and self.start_date != '':
+            self.chart_range[0] = date_list.index(self.start_date)
+        else:
+            self.chart_range[0] = 0
+        if self.stop_date is not None and self.start_date != '':
+            self.chart_range[1] = date_list.index(self.stop_date) + 1
+        else:
+            self.chart_range[1] = self.df.shape[0]
+        self.subset_lists()
+
+    def subset_lists(self):
+        self.x_values = self.x_values[self.chart_range[0]: self.chart_range[1]]
+        self.y_values = self.y_values[self.chart_range[0]: self.chart_range[1]]
+        self.x_points = self.x_points[self.chart_range[0]: self.chart_range[1]]
+        self.median = self.median[self.chart_range[0]: self.chart_range[1]]
+        self.centerline = self.centerline[self.chart_range[0]: self.chart_range[1]]
+        self.ucl = self.ucl[self.chart_range[0]: self.chart_range[1]]
+        self.lcl = self.lcl[self.chart_range[0]: self.chart_range[1]]
+        self.colors = self.colors[self.chart_range[0]: self.chart_range[1]]
+        self.markers = self.markers[self.chart_range[0]: self.chart_range[1]]
 
     def create_data_points(self):
         self.df['Total Putts'] = self.df[['Made'

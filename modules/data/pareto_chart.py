@@ -1,9 +1,13 @@
 import pandas as pd
 from matplotlib import pyplot as plt
+from datetime import datetime
 
 class ParetoChart():
-    def __init__(self, df: pd.DataFrame, distance: int = None):
-        self.df = df if distance is None else df.loc[df['Distance'] == int(distance)]
+    def __init__(self, df: pd.DataFrame, distance: int = None, start_date: str = None, stop_date: str = None):
+        self.df = df
+        self.distance = distance
+        self.start_date = datetime.strptime(start_date, '%Y-%m-%d') if start_date is not None else start_date
+        self.stop_date = datetime.strptime(stop_date, '%Y-%m-%d') if stop_date is not None else stop_date
 
         self.failures = ['High'
                          , 'High-Right'
@@ -23,6 +27,13 @@ class ParetoChart():
         self.execute()
 
     def execute(self):
+        self.df['Date'] = pd.to_datetime(self.df['Date'])
+        if self.distance is not None and self.distance != '':
+            self.df = self.df.loc[self.df['Distance'] == int(self.distance)]
+        if self.start_date is not None and self.start_date != '':
+            self.df = self.df.loc[self.df['Date'] >= self.start_date]
+        if self.stop_date is not None and self.start_date != '':
+            self.df = self.df.loc[self.df['Date'] <= self.stop_date]
         self.create_failures()
         self.create_total_misses()
         self.create_cumulative_percent()

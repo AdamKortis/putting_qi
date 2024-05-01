@@ -83,6 +83,10 @@ class MainWindow(tk.Tk):
         # distance select
         self.distance = tk.StringVar()
 
+        # date select
+        self.start_date = tk.StringVar()
+        self.stop_date = tk.StringVar()
+
         self.execute()
 
     def __close(self):
@@ -115,6 +119,9 @@ class MainWindow(tk.Tk):
         menu = Menu(self)
         chart_menu = Menu(menu, tearoff=0)
         chart_menu.add_command(label='Subset on Distance', command=self.subset_distance)
+        chart_menu.add_command(label='Subset on Dates', command=self.subset_dates)
+        chart_menu.add_command(label='Reset Charts', command=self.reset_charts)
+        chart_menu.add_command(label='Change Centerline')
         menu.add_cascade(label='Charts', menu=chart_menu)
         self.config(menu=menu)
 
@@ -294,34 +301,64 @@ class MainWindow(tk.Tk):
             self.create_pareto_chart()
             self.create_control_chart()
 
-    def create_pareto_chart(self, distance: str = None):
-        figure = create_pareto_chart(distance)
+    def create_pareto_chart(self
+                            , distance: str = None
+                            , start_date: str = None
+                            , stop_date: str = None):
+        figure = create_pareto_chart(distance, start_date, stop_date)
         canvas = FigureCanvasTkAgg(figure, self.pareto_tab)
         canvas.get_tk_widget().pack()
 
-    def redraw_pareto(self, distance: str = None):
+    def redraw_pareto(self
+                      , distance: str = None
+                      , start_date: str = None
+                      , stop_date: str = None):
         for widget in self.pareto_tab.winfo_children():
             widget.destroy()
         plot_close('all')
-        self.create_pareto_chart(distance)
+        self.create_pareto_chart(distance, start_date, stop_date)
 
-    def create_control_chart(self, distance: str = None):
-        figure = create_control_chart(distance)
+    def create_control_chart(self
+                             , distance: str = None
+                             , start_date: str = None
+                             , stop_date: str = None):
+        figure = create_control_chart(distance, start_date, stop_date)
         canvas = FigureCanvasTkAgg(figure, self.control_tab)
         canvas.get_tk_widget().pack()
 
-    def redraw_control(self, distance: str = None):
+    def redraw_control(self
+                       , distance: str = None
+                       , start_date: str = None
+                       , stop_date: str = None):
         for widget in self.control_tab.winfo_children():
             widget.destroy()
         plot_close('all')
-        self.create_control_chart(distance)
+        self.create_control_chart(distance, start_date, stop_date)
 
     def subset_distance(self):
         top = Toplevel(self)
         distance_select = Combobox(top, values=['all','2', '4', '6', '8', '10'], textvariable=self.distance).pack()
-        Button(top, text='Submit', command=lambda: self.redraw_charts(top, self.distance.get())).pack()
+        Button(top, text='Submit', command=lambda: self.redraw_charts(top)).pack()
 
-    def redraw_charts(self, top: Toplevel, distance: str):
+    def subset_dates(self):
+        top = Toplevel(self)
+        Label(top, text='Select Start Date:').pack()
+        Combobox(top, values=get_dates(), textvariable=self.start_date).pack()
+        Label(top, text='Select End Date:').pack()
+        Combobox(top, values=get_dates(), textvariable=self.stop_date).pack()
+        Button(top, text='Submit', command=lambda: self.redraw_charts(top)).pack()
+
+    def redraw_charts(self, top: Toplevel):
         top.destroy()
-        self.redraw_pareto(distance)
-        self.redraw_control(distance)
+        distance = self.distance.get()
+        start_date = self.start_date.get()
+        stop_date = self.stop_date.get()
+        self.redraw_pareto(distance, start_date, stop_date)
+        self.redraw_control(distance, start_date, stop_date)
+    
+    def reset_charts(self):
+        self.distance.set('')
+        self.start_date.set('')
+        self.stop_date.set('')
+        self.redraw_pareto()
+        self.redraw_control()
