@@ -6,8 +6,8 @@ class ParetoChart():
     def __init__(self, df: pd.DataFrame, distance: int = None, start_date: str = None, stop_date: str = None):
         self.df = df
         self.distance = distance
-        self.start_date = datetime.strptime(start_date, '%Y-%m-%d') if start_date is not None else start_date
-        self.stop_date = datetime.strptime(stop_date, '%Y-%m-%d') if stop_date is not None else stop_date
+        self.start_date = start_date
+        self.stop_date = stop_date
 
         self.failures = ['High'
                          , 'High-Right'
