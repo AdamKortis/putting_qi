@@ -6,6 +6,7 @@ from modules.data.control_chart import ControlChart
 from datetime import datetime
 
 DATA_FILE = f'{getcwd()}/files/csv/putt_data.csv'
+CENTERLINE_FILE = f'{getcwd()}/files/csv/centerlines.csv'
 
 def submit_data(date: datetime, putt_data: list):
     if file_check():
@@ -39,6 +40,12 @@ def file_check():
 def load_file():
     return pd.read_csv(DATA_FILE, header=0, sep='|')
 
+def centerline_file_check():
+    return isfile(CENTERLINE_FILE)
+
+def load_centerline():
+    return pd.read_csv(CENTERLINE_FILE, header=0, sep='|')
+
 def create_pareto_chart(distance: str, start_date: str, stop_date: str):
     df = load_file()
     df.sort_values(by='Date', inplace=True)
@@ -62,3 +69,16 @@ def get_dates() -> list:
     df.sort_values(by='Date', inplace=True)
     date_list = list(df['Date'].drop_duplicates().values)
     return [x[:10] for x in date_list]
+
+def add_centerline(distance: str, start_date: str, end_date: str, calc_start_date:str, calc_end_date: str) -> None:
+    df = load_centerline()
+    row = pd.DataFrame([{'distance': distance
+                            , 'start_date': start_date
+                            , 'end_date': end_date
+                            , 'calc_start_date': calc_start_date
+                            , 'calc_end_date': calc_end_date}])
+    df = pd.concat((df, row), ignore_index=True)
+    df.to_csv(CENTERLINE_FILE
+              , header=True
+              , index=False
+              , sep='|')

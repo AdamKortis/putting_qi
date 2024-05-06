@@ -87,6 +87,13 @@ class MainWindow(tk.Tk):
         self.start_date = tk.StringVar()
         self.stop_date = tk.StringVar()
 
+        #centerline creation
+        self.cl_distance = tk.StringVar()
+        self.cl_start = tk.StringVar()
+        self.cl_end = tk.StringVar()
+        self.cl_calc_start = tk.StringVar()
+        self.cl_calc_end = tk.StringVar()
+
         self.execute()
 
     def __close(self):
@@ -121,7 +128,7 @@ class MainWindow(tk.Tk):
         chart_menu.add_command(label='Subset on Distance', command=self.subset_distance)
         chart_menu.add_command(label='Subset on Dates', command=self.subset_dates)
         chart_menu.add_command(label='Reset Charts', command=self.reset_charts)
-        chart_menu.add_command(label='Change Centerline')
+        chart_menu.add_command(label='Change Centerline', command=self.change_centerline)
         menu.add_cascade(label='Charts', menu=chart_menu)
         self.config(menu=menu)
 
@@ -362,3 +369,32 @@ class MainWindow(tk.Tk):
         self.stop_date.set('')
         self.redraw_pareto()
         self.redraw_control()
+
+    def change_centerline(self):
+        top = Toplevel(self)
+        date_lst = get_dates()
+        Label(top, text='Select Distance:').pack()
+        Combobox(top, values=['all', '2', '4', '6', '8', '10'], textvariable=self.cl_distance).pack()
+        Label(top, text='Centerline Start Date:').pack()
+        Combobox(top, values=date_lst, textvariable=self.cl_start).pack()
+        Label(top, text='Centerline End Date').pack()
+        Combobox(top, values=date_lst, textvariable=self.cl_end).pack()
+        Label(top, text='Centerline Calc Start Date').pack()
+        Combobox(top, values=date_lst, textvariable=self.cl_calc_start).pack()
+        Label(top, text='Centerline Calc End Date').pack()
+        Combobox(top, values=date_lst, textvariable=self.cl_calc_end).pack()
+        Button(top, text='Submit', command=lambda: self.add_centerline(top))
+
+    def add_centerline(self, top: Toplevel) -> None:
+        add_centerline(self.cl_distance.get()
+                       , self.cl_start.get()
+                       , self.cl_end.get()
+                       , self.cl_calc_start.get()
+                       , self.cl_calc_end.get())
+        self.redraw_charts(top)
+        self.cl_distance.set('')
+        self.cl_start('')
+        self.cl_end('')
+        self.cl_calc_start('')
+        self.cl_calc_start('')
+
