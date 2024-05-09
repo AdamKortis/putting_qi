@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
 from datetime import datetime
+from os import getcwd
 
 class ControlChart():
     def __init__(self, df: pd.DataFrame, distance: str = None, start_date: str = None, stop_date: str = None):
@@ -24,6 +25,10 @@ class ControlChart():
         self.lcl = []
         self.colors = []
         self.markers = []
+
+        self.centerline_df = pd.read_csv(f'{getcwd()}/files/csv/centerlines.csv'
+                                           , header=0
+                                           , sep='|')
 
         self.execute()
 
@@ -102,6 +107,25 @@ class ControlChart():
         temp_df = self.df.head(20).copy()
         self.df['centerline'] = (temp_df['Made'].sum() / temp_df['Total Putts'].sum()) * 100
         self.centerline = list(self.df['centerline'].values)
+        self.add_other_centerlines()
+
+    def add_other_centerlines(self):
+        if self.distance is not None and self.distance != '':
+            self.centerline_df = self.centerline_df.loc[self.centerline_df['distance'] == self.distance]
+        else:
+            self.centerline_df = self.centerline_df.loc[self.centerline_df['distance'] == 'all']
+        if self.centerline_df.shape[0] == 0:
+            return
+        for col in ('start_date', 'end_date', 'calc_start_date', 'calc_end_date'):
+            self.centerline_df[col] = pd.to_datetime(self.centerline_df[col])
+        for index, row in self.centerline_df.iterrows():
+            calc_start_bool = self.df['Date'] >= row['calc_start_date']
+            calc_end_bool = self.df['Date'] <= row['calc_end_date']
+            temp_df = self.df.loc[(calc_start_bool & calc_end_bool)].copy()
+            centerline = (temp_df['Made'].sum() / temp_df['Total Putts'].sum()) * 100
+            start_bool = self.df['Date'] >= row['start_date']
+            end_bool = self.df['Date'] <= row['end_date']
+            self.df.loc[(start_bool & end_bool), 'centerline'] = centerline
 
     def create_upper_control_limit(self):
         self.df['ucl'] = self.df['centerline'] + (3 * np.sqrt((self.df['centerline'] * (100 - self.df['centerline']))/20))
@@ -112,7 +136,6 @@ class ControlChart():
         self.df['lcl'] = self.df['centerline'] - (3 * np.sqrt((self.df['centerline'] * (100 - self.df['centerline']))/20))
         self.df.loc[self.df['lcl'] < 0, 'lcl'] = 0
         self.lcl = list(self.df['lcl'].values)
-
 
     def flag_above_centerline(self):
         self.df['above_centerline'] = 0
