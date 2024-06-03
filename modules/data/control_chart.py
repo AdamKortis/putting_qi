@@ -126,6 +126,7 @@ class ControlChart():
             start_bool = self.df['Date'] >= row['start_date']
             end_bool = self.df['Date'] <= row['end_date']
             self.df.loc[(start_bool & end_bool), 'centerline'] = centerline
+            self.centerline = list(self.df['centerline'].values)
 
     def create_upper_control_limit(self):
         self.df['ucl'] = self.df['centerline'] + (3 * np.sqrt((self.df['centerline'] * (100 - self.df['centerline']))/20))
@@ -204,6 +205,7 @@ class ControlChart():
             for x, y, c, m in zip(self.x_points, self.y_values, self.colors, self.markers):
                 plt.scatter(x, y, color=c, marker=m)
             plt.annotate(str(round(self.centerline[0], 2))+'%', (self.x_points[0], self.centerline[0]))
+            plt.annotate(str(round(self.centerline[-1], 2))+'%', (self.x_points[-1], self.centerline[-1]))
         plt.xticks(self.x_points, labels=self.x_values, rotation=90, fontsize=8)
         return fig
         

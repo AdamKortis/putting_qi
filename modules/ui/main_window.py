@@ -383,7 +383,7 @@ class MainWindow(tk.Tk):
         Combobox(top, values=date_lst, textvariable=self.cl_calc_start).pack()
         Label(top, text='Centerline Calc End Date').pack()
         Combobox(top, values=date_lst, textvariable=self.cl_calc_end).pack()
-        Button(top, text='Submit', command=lambda: self.add_centerline(top))
+        Button(top, text='Submit', command=lambda: self.add_centerline(top)).pack()
 
     def add_centerline(self, top: Toplevel) -> None:
         add_centerline(self.cl_distance.get()
